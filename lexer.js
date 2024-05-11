@@ -1,7 +1,7 @@
 // Definindo os tipos de tokens
 const TokenType = {
   ILLEGAL: "ILLEGAL",
-  EOF: "EOF",
+  EOF: "EOF", //end of file
   // Tokens de identificadores e literais
   IDENT: "IDENT",
   INT: "INT",
@@ -64,6 +64,12 @@ function lexer(input) {
       case "-":
         token = Token(TokenType.MINUS, char);
         break;
+      case ";":
+        token = Token(TokenType.SEMICOLON, char);
+        break;
+      case "":
+        token = Token(TokenType.EOF, char);
+        break;
 
       default:
         if (isLetter(char)) {
@@ -71,8 +77,8 @@ function lexer(input) {
           token = Token(lookupIdentifier(identifier), identifier);
         } else if (isDigit(char)) {
           token = Token(TokenType.INT, readNumber());
-        } else if (char === "") {
-          token = Token(TokenType.EOF, char);
+        } else {
+          token = Token(TokenType.ILLEGAL, char);
         }
     }
 
@@ -97,17 +103,23 @@ function lexer(input) {
 
   function readNumber() {
     const startPos = position;
+
     while (isDigit(char)) {
       readChar();
     }
+
     return input.slice(startPos, position);
   }
 
   function isLetter(char) {
+    console.log(position);
+
     return /^[a-zA-Z_]/.test(char);
   }
 
   function isDigit(char) {
+    // console.log(/^\d/.test(char), char);
+
     return /^\d/.test(char);
   }
 
@@ -137,10 +149,26 @@ function lexer(input) {
   return nextToken;
 }
 
-const getNextToken = lexer("let x = 5 + 10;");
+const getNextToken = lexer("a let x = 5 + 10;");
 let token = getNextToken();
+console.log(token);
 
-while (token.type != TokenType.EOF) {
-  console.log(token);
-  token = getNextToken();
-}
+// while (token.type != TokenType.EOF) {
+//   console.log(token);
+//   token = getNextToken();
+// }
+
+// getNextToken();
+// getNextToken();
+// getNextToken();
+// getNextToken();
+// getNextToken();
+// getNextToken();
+
+// console.log(getNextToken());
+// console.log(getNextToken());
+// console.log(getNextToken());
+// console.log(getNextToken());
+// console.log(getNextToken());
+// console.log(getNextToken());
+// console.log(getNextToken());
