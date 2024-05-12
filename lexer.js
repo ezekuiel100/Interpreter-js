@@ -74,9 +74,9 @@ function lexer(input) {
       default:
         if (isLetter(char)) {
           let identifier = readIdentifier();
-          token = Token(lookupIdentifier(identifier), identifier);
+          return (token = Token(lookupIdentifier(identifier), identifier));
         } else if (isDigit(char)) {
-          token = Token(TokenType.INT, readNumber());
+          return (token = Token(TokenType.INT, readNumber()));
         } else {
           token = Token(TokenType.ILLEGAL, char);
         }
@@ -108,18 +108,18 @@ function lexer(input) {
       readChar();
     }
 
+    if (!isDigit(char)) {
+      Token(TokenType.ILLEGAL, char);
+    }
+
     return input.slice(startPos, position);
   }
 
   function isLetter(char) {
-    console.log(position);
-
     return /^[a-zA-Z_]/.test(char);
   }
 
   function isDigit(char) {
-    // console.log(/^\d/.test(char), char);
-
     return /^\d/.test(char);
   }
 
@@ -149,26 +149,10 @@ function lexer(input) {
   return nextToken;
 }
 
-const getNextToken = lexer("a let x = 5 + 10;");
+const getNextToken = lexer("let4 x = 5 + 10;");
 let token = getNextToken();
-console.log(token);
 
-// while (token.type != TokenType.EOF) {
-//   console.log(token);
-//   token = getNextToken();
-// }
-
-// getNextToken();
-// getNextToken();
-// getNextToken();
-// getNextToken();
-// getNextToken();
-// getNextToken();
-
-// console.log(getNextToken());
-// console.log(getNextToken());
-// console.log(getNextToken());
-// console.log(getNextToken());
-// console.log(getNextToken());
-// console.log(getNextToken());
-// console.log(getNextToken());
+while (token.type != TokenType.EOF) {
+  console.log(token);
+  token = getNextToken();
+}
