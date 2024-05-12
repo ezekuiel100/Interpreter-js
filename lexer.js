@@ -12,6 +12,8 @@ const TokenType = {
   BANG: "!",
   ASTERISK: "*",
   SLASH: "/",
+  EQ: "==",
+  NOT_EQ: "!=",
   // Delimitadores
   COMMA: ",",
   SEMICOLON: ";",
@@ -27,6 +29,9 @@ const TokenType = {
   IF: "IF",
   ELSE: "ELSE",
   RETURN: "RETURN",
+
+  LT: "<",
+  GT: ">",
 };
 
 // Estrutura de dados para representar um token
@@ -56,7 +61,13 @@ function lexer(input) {
 
     switch (char) {
       case "=":
-        token = Token(TokenType.ASSIGN, char);
+        if (peekChar() === char) {
+          char += char;
+          token = Token(TokenType.EQ, char);
+          readChar();
+        } else {
+          token = Token(TokenType.ASSIGN, char);
+        }
         break;
       case "+":
         token = Token(TokenType.PLUS, char);
@@ -64,7 +75,31 @@ function lexer(input) {
       case "-":
         token = Token(TokenType.MINUS, char);
         break;
+      case "*":
+        token = Token(TokenType.ASTERISK, char);
+        break;
       case ";":
+        token = Token(TokenType.SEMICOLON, char);
+        break;
+      case "!":
+        if (peekChar() === "=") {
+          char += "=";
+          token = Token(TokenType.NOT_EQ, char);
+          readChar();
+        } else {
+          token = Token(TokenType.BANG, char);
+        }
+        break;
+      case "/":
+        token = Token(TokenType.SLASH, char);
+        break;
+      case "<":
+        token = Token(TokenType.LT, char);
+        break;
+      case ">":
+        token = Token(TokenType.GT, char);
+        break;
+      case ",":
         token = Token(TokenType.SEMICOLON, char);
         break;
       case "":
@@ -89,6 +124,14 @@ function lexer(input) {
   function skipWhiteSpace() {
     while (char === " " || char === "\t" || char === "\n" || char === "\r") {
       readChar();
+    }
+  }
+
+  function peekChar() {
+    if (readPosition >= input.length) {
+      return 0;
+    } else {
+      return input.charAt(readPosition);
     }
   }
 
@@ -149,7 +192,7 @@ function lexer(input) {
   return nextToken;
 }
 
-const getNextToken = lexer("let4 x = 5 + 10;");
+const getNextToken = lexer("let x == 5 + 10;");
 let token = getNextToken();
 
 while (token.type != TokenType.EOF) {
