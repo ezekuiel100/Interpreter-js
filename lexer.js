@@ -192,10 +192,11 @@ function lexer(input) {
   return nextToken;
 }
 
-const getNextToken = lexer("let x == 5 + 10;");
-let token = getNextToken();
+// const getNextToken = lexer("let x = 5 + 10;");
+// let token = getNextToken();
 
-while (token.type != TokenType.EOF) {
-  console.log(token);
-  token = getNextToken();
-}
+// while (token.type != TokenType.EOF) {
+//   console.log(token);
+//   token = getNextToken();
+// }
+module.exports = { lexer, TokenType };
