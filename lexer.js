@@ -201,7 +201,7 @@ function Lexer(input) {
   }
 
   readChar();
-  return nextToken;
+  return { nextToken };
 }
 
-module.exports = { Lexer, Token };
+module.exports = { Lexer, Token, TokenType };

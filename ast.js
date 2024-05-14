@@ -1,22 +1,22 @@
-const Statements = [];
-const token = {};
-
-function TokenLiteral() {
-  if (Statements.length > 0) {
-    return Statements[0].TokenLiteral();
-  }
-
-  return "";
+function createProgram(statements) {
+  return { type: "Program", statements };
 }
 
-function tokenLiteral() {
-  return token.literal;
+function createLetStatement(identifier, value) {
+  return { type: "LetStatement", identifier, value };
 }
 
-function statementNode() {}
+function createLiteral(token) {
+  return { type: "Literal", value: token.literal };
+}
 
-function expressionNode() {}
+function createIdentifier(token) {
+  return { type: "identifier", value: token.literal };
+}
 
-function Identifier(token, value) {}
-
-module.exports = { Identifier };
+module.exports = {
+  createProgram,
+  createIdentifier,
+  createLiteral,
+  createLetStatement,
+};
