@@ -1,5 +1,5 @@
 const readline = require("readline");
-const { lexer, TokenType } = require("./lexer"); // Importar a função lexer e o TokenType
+const { Lexer, TokenType } = require("./lexer"); // Importar a função lexer e o TokenType
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -10,7 +10,7 @@ const rl = readline.createInterface({
 rl.prompt();
 
 rl.on("line", (line) => {
-  const getNextToken = lexer(line); // Criar o lexer com a linha de entrada
+  const getNextToken = Lexer(line); // Criar o lexer com a linha de entrada
   let token = getNextToken(); // Obter o primeiro token
 
   while (token.type !== TokenType.EOF) {

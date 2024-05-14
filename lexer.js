@@ -39,7 +39,7 @@ function Token(type, literal) {
   return { type, literal };
 }
 
-function lexer(input) {
+function Lexer(input) {
   let position = 0;
   let readPosition = 0;
   let char = "";
@@ -99,8 +99,20 @@ function lexer(input) {
       case ">":
         token = Token(TokenType.GT, char);
         break;
+      case "(":
+        token = Token(TokenType.LPAREN, char);
+        break;
+      case ")":
+        token = Token(TokenType.RPAREN, char);
+        break;
+      case "{":
+        token = Token(TokenType.LBRACE, char);
+        break;
+      case "}":
+        token = Token(TokenType.RBRACE, char);
+        break;
       case ",":
-        token = Token(TokenType.SEMICOLON, char);
+        token = Token(TokenType.COMMA, char);
         break;
       case "":
         token = Token(TokenType.EOF, char);
@@ -192,11 +204,4 @@ function lexer(input) {
   return nextToken;
 }
 
-// const getNextToken = lexer("let x = 5 + 10;");
-// let token = getNextToken();
-
-// while (token.type != TokenType.EOF) {
-//   console.log(token);
-//   token = getNextToken();
-// }
-module.exports = { lexer, TokenType };
+module.exports = { Lexer, Token };
