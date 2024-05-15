@@ -3,37 +3,34 @@ const l = require("./lexer");
 
 const { Lexer, TokenType } = l;
 
-function Parser() {
+function Parser(input) {
   const lexer = Lexer(input);
 
-  let curToken = lexer.nextToken();
+  let currentToken = lexer.nextToken();
   let peekToken = lexer.nextToken();
 
-  const errors = [];
-
   function nextToken() {
-    curToken = peekToken;
+    currentToken = peekToken;
     peekToken = lexer.nextToken();
   }
 
   function parseProgram() {
-    const statements = [];
+    let statement = [];
 
-    while (curToken.type !== TokenType.EOF) {
-      const stmt = parseStatement();
+    while (currentToken.type != TokenType.EOF) {
+      const stm = parseStatement();
 
-      if (stmt) {
-        statements.push(stmt);
+      if (stm) {
+        statement.push(stm);
+        nextToken();
       }
-
-      nextToken();
     }
 
-    return ast.createProgram(statements);
+    return ast.createProgram(statement);
   }
 
   function parseStatement() {
-    switch (TokenType.LET) {
+    switch (currentToken.type) {
       case "LET":
         return parseLetStatement();
       default:
@@ -42,59 +39,29 @@ function Parser() {
   }
 
   function parseLetStatement() {
-    if (!expectPeek(TokenType.IDENT)) {
-      return null;
+    nextToken();
+
+    if (peekToken.type != TokenType.ASSIGN) {
+      console.log("Erro");
     }
 
-    const Identifier = ast.createIdentifier(curToken);
+    const identifier = ast.createIdentifier(currentToken);
 
-    if (!expectPeek(TokenType.ASSIGN)) {
-      return null;
-    }
-
-    while (!currentTokenIs(TokenType.SEMICOLON)) {
+    while (peekToken.type != ";") {
       nextToken();
     }
 
-    const literal = ast.createLiteral({ literal: "dummy" });
+    const literal = ast.createLiteral(currentToken);
 
-    return ast.createLetStatement(Identifier, literal);
+    nextToken();
+
+    return ast.createLetStatement(identifier, literal);
   }
 
-  function currentTokenIs(type) {
-    return curToken.type === type;
-  }
-
-  function peekTokenIs(type) {
-    return peekToken.type === type;
-  }
-
-  function expectPeek(type) {
-    if (peekTokenIs(type)) {
-      nextToken();
-      return true;
-    } else {
-      peekError(type);
-      return false;
-    }
-  }
-
-  function peekError(type) {
-    const msg = `expected next token to be ${type}, got ${peekToken.type} instead`;
-    errors.push(msg);
-  }
-
-  return { parseProgram, errors };
+  return { parseProgram };
 }
 
-const input = `let x = ;`;
+const input = `let x =  6;`;
+let program = Parser(input).parseProgram();
 
-const parser = Parser(input);
-const program = parser.parseProgram();
-
-if (parser.errors.length > 0) {
-  console.log("Parser errors:");
-  console.log(parser.errors);
-} else {
-  console.log(JSON.stringify(program, null, 2));
-}
+console.log(JSON.stringify(program, null, 2));
