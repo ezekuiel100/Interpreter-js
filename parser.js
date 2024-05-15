@@ -1,7 +1,7 @@
 const ast = require("./ast");
 const l = require("./lexer");
 
-const { Lexer, Token, TokenType } = l;
+const { Lexer, TokenType } = l;
 
 function Parser() {
   const lexer = Lexer(input);
@@ -33,7 +33,6 @@ function Parser() {
   }
 
   function parseStatement() {
-    ast.createIdentifier(curToken, curToken.literal);
     switch (TokenType.LET) {
       case "LET":
         return parseLetStatement();
@@ -43,8 +42,6 @@ function Parser() {
   }
 
   function parseLetStatement() {
-    const token = curToken;
-
     if (!expectPeek(TokenType.IDENT)) {
       return null;
     }
@@ -90,11 +87,7 @@ function Parser() {
   return { parseProgram, errors };
 }
 
-const input = `
-let x = 5;
-let y = 10;
-let foobar = 838383;
-`;
+const input = `let x = ;`;
 
 const parser = Parser(input);
 const program = parser.parseProgram();

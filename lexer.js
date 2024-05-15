@@ -204,4 +204,4 @@ function Lexer(input) {
   return { nextToken };
 }
 
-module.exports = { Lexer, Token, TokenType };
+module.exports = { Lexer, TokenType };
