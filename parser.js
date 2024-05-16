@@ -33,9 +33,11 @@ function Parser() {
   }
 
   function parseStatement() {
-    switch (TokenType.LET) {
+    switch (curToken.type) {
       case "LET":
         return parseLetStatement();
+      case "RETURN":
+        return parseReturnStatement();
       default:
         return null;
     }
@@ -59,6 +61,22 @@ function Parser() {
     const literal = ast.createLiteral({ literal: "dummy" });
 
     return ast.createLetStatement(Identifier, literal);
+  }
+
+  function parseReturnStatement() {
+    let returnValue = "";
+
+    while (
+      peekToken.type != TokenType.EOF &&
+      peekToken.type != TokenType.SEMICOLON
+    ) {
+      nextToken();
+      returnValue += curToken.literal;
+    }
+
+    // returnValue = ast.createLiteral({ literal: "dummy" });
+
+    return ast.createReturnStatement(returnValue);
   }
 
   function currentTokenIs(type) {
@@ -87,7 +105,7 @@ function Parser() {
   return { parseProgram, errors };
 }
 
-const input = `let x = ;`;
+const input = `return 6 - 3;`;
 
 const parser = Parser(input);
 const program = parser.parseProgram();
