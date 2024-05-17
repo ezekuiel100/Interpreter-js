@@ -232,7 +232,7 @@ function Parser() {
   return { parseProgram, errors };
 }
 
-const input = `3-5;`;
+const input = `3-5; `;
 
 const parser = Parser(input);
 const program = parser.parseProgram();
