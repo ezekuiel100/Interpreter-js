@@ -3,6 +3,27 @@ const l = require("./lexer");
 
 const { Lexer, TokenType } = l;
 
+const Precedences = {
+  LOWEST: 1,
+  EQUALS: 2, // ==
+  LESSGREATER: 3, // > or <
+  SUM: 4, // +
+  PRODUCT: 5, // *
+  PREFIX: 6, // -X or !X
+  CALL: 7, // myFunction(X)
+};
+
+const precedences = {
+  [TokenType.EQ]: Precedences.EQUALS,
+  [TokenType.NOT_EQ]: Precedences.EQUALS,
+  [TokenType.LT]: Precedences.LESSGREATER,
+  [TokenType.GT]: Precedences.LESSGREATER,
+  [TokenType.PLUS]: Precedences.SUM,
+  [TokenType.MINUS]: Precedences.SUM,
+  [TokenType.SLASH]: Precedences.PRODUCT,
+  [TokenType.ASTERISK]: Precedences.PRODUCT,
+};
+
 function Parser() {
   const lexer = Lexer(input);
 
@@ -11,9 +32,72 @@ function Parser() {
 
   const errors = [];
 
+  const prefixParseFns = {};
+  const infixParseFns = {};
+
   function nextToken() {
     curToken = peekToken;
     peekToken = lexer.nextToken();
+  }
+
+  function registerPrefix(tokenType, fn) {
+    prefixParseFns[tokenType] = fn;
+  }
+
+  function registerInfix(tokenType, fn) {
+    infixParseFns[tokenType] = fn;
+  }
+
+  registerPrefix(TokenType.IDENT, parseIdentifier);
+  registerPrefix(TokenType.INT, parseIntegerLiteral);
+  registerPrefix(TokenType.BANG, parsePrefixExpression);
+  registerPrefix(TokenType.MINUS, parsePrefixExpression);
+
+  registerInfix(TokenType.PLUS, parseInfixExpression);
+  registerInfix(TokenType.MINUS, parseInfixExpression);
+  registerInfix(TokenType.SLASH, parseInfixExpression);
+  registerInfix(TokenType.ASTERISK, parseInfixExpression);
+  registerInfix(TokenType.EQ, parseInfixExpression);
+  registerInfix(TokenType.NOT_EQ, parseInfixExpression);
+  registerInfix(TokenType.LT, parseInfixExpression);
+  registerInfix(TokenType.GT, parseInfixExpression);
+
+  function parsePrefixExpression() {
+    const token = curToken;
+    const operator = curToken.literal;
+
+    nextToken();
+
+    const right = parseExpression(Precedences.PREFIX);
+
+    return ast.PrefixExpression(token, operator, right);
+  }
+
+  function parseInfixExpression(left) {
+    const token = curToken;
+    const operator = curToken.literal;
+    const precedence = curPrecedence();
+
+    nextToken();
+
+    const right = parseExpression(precedence);
+
+    return ast.InfixExpression(token, left, operator, right);
+  }
+
+  function curPrecedence() {
+    if (curToken.type in precedences) {
+      return precedences[curToken.type];
+    }
+    return Precedences.LOWEST;
+  }
+
+  function peekPrecedence() {
+    if (precedences[peekToken.type]) {
+      return precedences[peekToken.type];
+    }
+
+    return Precedences.LOWEST;
   }
 
   function parseProgram() {
@@ -39,7 +123,7 @@ function Parser() {
       case "RETURN":
         return parseReturnStatement();
       default:
-        return null;
+        return parseExpressionStatement();
     }
   }
 
@@ -64,19 +148,62 @@ function Parser() {
   }
 
   function parseReturnStatement() {
-    let returnValue = "";
+    const token = curToken;
+    nextToken();
 
-    while (
-      peekToken.type != TokenType.EOF &&
-      peekToken.type != TokenType.SEMICOLON
-    ) {
+    // skipping expressions parsing for now
+    while (!currentTokenIs(TokenType.SEMICOLON)) {
       nextToken();
-      returnValue += curToken.literal;
     }
 
-    // returnValue = ast.createLiteral({ literal: "dummy" });
+    const returnValue = ast.createLiteral({ literal: "dummy" });
 
-    return ast.createReturnStatement(returnValue);
+    return ast.createReturnStatement(token, returnValue);
+  }
+
+  function parseExpressionStatement() {
+    const token = curToken;
+    const expression = parseExpression(Precedences.LOWEST);
+
+    if (peekToken.type === TokenType.SEMICOLON) {
+      nextToken();
+    }
+
+    return ast.createExpressionStatement(token, expression);
+  }
+
+  function parseExpression(precedence) {
+    const prefix = prefixParseFns[curToken.type];
+
+    if (!prefix) return null;
+
+    let leftExp = prefix();
+
+    console.log(curPrecedence(), precedence);
+
+    while (!peekTokenIs(TokenType.SEMICOLON) && precedence < peekPrecedence()) {
+      const infix = infixParseFns[peekToken.type];
+      if (!infix) {
+        return leftExp;
+      }
+      nextToken();
+      leftExp = infix(leftExp);
+    }
+
+    return leftExp;
+  }
+
+  function parseIdentifier() {
+    return { type: "Identifier", value: curToken.literal };
+  }
+
+  function parseIntegerLiteral() {
+    const value = parseInt(curToken.literal, 10);
+    if (isNaN(value)) {
+      errors.push(`could not parse ${curToken.literal} as integer`);
+      return null;
+    }
+    return { type: "IntegerLiteral", value: value };
   }
 
   function currentTokenIs(type) {
@@ -105,7 +232,7 @@ function Parser() {
   return { parseProgram, errors };
 }
 
-const input = `return 6 - 3;`;
+const input = `3-5;`;
 
 const parser = Parser(input);
 const program = parser.parseProgram();

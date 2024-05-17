@@ -6,16 +6,28 @@ function createLetStatement(identifier, value) {
   return { type: "LetStatement", identifier, value };
 }
 
-function createReturnStatement(value) {
-  return { type: "ReturnStatement", value };
+function createReturnStatement(token, value) {
+  return { type: "ReturnStatement", token, value };
+}
+
+function createExpressionStatement(token, expression) {
+  return { type: "ExpressionStatement", token, expression };
 }
 
 function createLiteral(token) {
   return { type: "Literal", value: token.literal };
 }
 
-function createIdentifier(token) {
-  return { type: "identifier", value: token.literal };
+function createIdentifier(value) {
+  return { type: "identifier", value };
+}
+
+function PrefixExpression(token, operator, right) {
+  return { token, operator, right };
+}
+
+function InfixExpression(token, left, operator, right) {
+  return { token, left, operator, right };
 }
 
 module.exports = {
@@ -24,4 +36,7 @@ module.exports = {
   createLiteral,
   createLetStatement,
   createReturnStatement,
+  createExpressionStatement,
+  PrefixExpression,
+  InfixExpression,
 };
